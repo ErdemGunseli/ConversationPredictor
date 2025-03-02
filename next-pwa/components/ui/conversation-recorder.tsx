@@ -826,7 +826,7 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
       };
       
       // Set up callbacks
-      const handlePredictionData = (data) => {
+      const handlePredictionData = (data: PredictionData) => {
         console.log("[PREDICTION] Received data:", data);
         if (data.text) {
           setPredictions(prev => {
