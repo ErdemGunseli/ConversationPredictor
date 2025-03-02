@@ -32,6 +32,7 @@ PREDICTION_CONTEXT = """
     Your answers do not need to be grammatically correct, make every single word count and remove words that don't add meaning.
     The key thing is what you are saying to be understood in as few words as possible, and read as easily as possible.
 
+    NEVER use 'may' or 'might' in your predictions - you are predicting, not guessing. Use phrases such as 'likely to'.
 
     Conversation Context:
     {context}
