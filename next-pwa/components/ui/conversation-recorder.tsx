@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { RealtimeClient } from '@speechmatics/real-time-client';
 import { Button } from '@/components/ui/button';
 import { Cover } from '@/components/ui/cover';
-import { MoreVertical, Languages, Glasses, Sparkles, LightbulbIcon } from 'lucide-react';
+import { MoreVertical, Languages, Glasses, Sparkles, LightbulbIcon, FileText } from 'lucide-react';
 import { fetchJWT } from '@/api/transcription';
 import { useLanguageSettings, getLanguageName } from './language-selector';
 import { RecordingButton } from './recording-button';
@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TranscriptionService } from '@/api/transcription';
+import { Textarea } from '@/components/ui/textarea';
 
 // Modified interface for transcript segments
 interface TranscriptSegment {
@@ -83,7 +84,7 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
   const { sourceLanguage, targetLanguage } = useLanguageSettings();
   
   // Use conversation context
-  const { createConversation, updateConversationTranscript, currentConversation, setCurrentConversation } = useConversation();
+  const { createConversation, updateConversationTranscript, updateConversation, currentConversation, setCurrentConversation } = useConversation();
 
   const nextSegmentIdRef = useRef<number>(1);
   const transcriptContainerRef = useRef<HTMLDivElement>(null);
@@ -315,21 +316,20 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
     return result.join(' ');
   };
 
-  // Change prediction state from string to an array of strings
   // Add state for predictions (up to 3 most recent)
   const [predictions, setPredictions] = useState<string[]>([]);
   const [isPredicting, setIsPredicting] = useState<boolean>(false);
   const [predictionError, setPredictionError] = useState<string | null>(null);
 
-  // Add ref for the TranscriptionService
-  const transcriptionServiceRef = useRef<TranscriptionService | null>(null);
-
-  // Add this ref to track if a prediction request is in progress
-  const isPredictionInProgressRef = useRef<boolean>(false);
-
-  // Store the last valid predictions (up to 3)
+  // Add this ref to store the last valid predictions
   const lastValidPredictionsRef = useRef<string[]>([]);
-
+  
+  // Add a ref to track active prediction stream
+  const activePredictionStreamRef = useRef<boolean>(false);
+  
+  // Add this ref for transcription service (needed in some effects)
+  const transcriptionServiceRef = useRef<any>(null);
+  
   // Track current conversation ID to detect changes
   const prevConversationIdRef = useRef<number | null>(null);
 
@@ -343,9 +343,6 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
       
       // Clear prediction state and the last valid prediction ref
       setPredictions([]);
-      lastValidPredictionsRef.current = [];
-      setIsPredicting(false);
-      setPredictionError(null);
       
       // Update the previous conversation ID ref
       prevConversationIdRef.current = currentId;
@@ -360,8 +357,6 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
     if (isRecording && !wasRecordingRef.current) {
       console.log(`[PREDICTION_STATE] Recording started, clearing predictions`);
       setPredictions([]);
-      lastValidPredictionsRef.current = [];
-      setIsPredicting(false);
     }
     
     // Update recording state tracking
@@ -371,180 +366,12 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
   // Additional ref to track recording state changes
   const wasRecordingRef = useRef<boolean>(false);
 
-  // Initialize the client with prediction handling
-  useEffect(() => {
-    const client = new RealtimeClient();
-    clientRef.current = client;
-
-    client.addEventListener('receiveMessage', ({ data }) => {
-      console.log("Message received:", data.message);
-      console.log("Full message data:", data);
-      
-      if (data.message === 'AddPartialTranscript') {
-        // Process partial transcript without any logging
-        const partialText = data.results
-          .map((r) => r.alternatives?.[0]?.content || '')
-          .join(' ')
-          .replace(/ ([,.!?;:])/g, '$1');
-        setPartialTranscript(partialText);
-      } else if (data.message === 'AddTranscript') {
-        // Process complete transcript without any logging
-        // Group words by speaker
-        let currentSpeaker = '';
-        let currentText = '';
-        
-        data.results.forEach((result) => {
-          const speaker = result.alternatives?.[0]?.speaker || 'UU';
-          const content = result.alternatives?.[0]?.content || '';
-          
-          // Add content with appropriate spacing
-          if (speaker !== currentSpeaker && currentText) {
-            // When speaker changes, add the previous segment
-            const cleanedText = currentText.trim().replace(/ ([,.!?;:])/g, '$1');
-            
-            setTranscriptSegments(prev => {
-              // Check if the last segment was from the same speaker
-              const lastSegment = prev.length > 0 ? prev[prev.length - 1] : null;
-              
-              if (lastSegment && lastSegment.speaker === currentSpeaker) {
-                // If same speaker, merge with previous segment
-                const updatedSegments = [...prev];
-                const newText = lastSegment.text + ' ' + cleanedText;
-                
-                updatedSegments[updatedSegments.length - 1] = {
-                  ...lastSegment,
-                  text: newText
-                };
-                return updatedSegments;
-              } else {
-                // Different speaker, add as new segment
-                const segmentId = nextSegmentIdRef.current++;
-                
-                // If translation is enabled, track this segment as pending translation
-                if (targetLanguage) {
-                  // Get current pending segments for this speaker
-                  const pendingIds = pendingSegmentsRef.current.get(currentSpeaker) || [];
-                  
-                  // Add this segment ID to the pending list
-                  pendingSegmentsRef.current.set(currentSpeaker, [...pendingIds, segmentId]);
-                }
-                
-                return [...prev, { 
-                  id: segmentId,
-                  text: cleanedText, 
-                  speaker: currentSpeaker || 'UU',
-                  translations: [],
-                  timestamp: Date.now()
-                }];
-              }
-            });
-            
-            currentText = content;
-          } else {
-            // Same speaker, append content with proper spacing
-            const isPunctuation = /^[,.!?;:]/.test(content);
-            currentText += isPunctuation ? content : ' ' + content;
-          }
-          
-          currentSpeaker = speaker;
-        });
-        
-        // Add the last segment
-        if (currentText) {
-          const cleanedText = currentText.trim().replace(/ ([,.!?;:])/g, '$1');
-          
-          setTranscriptSegments(prev => {
-            // Check if the last segment was from the same speaker
-            const lastSegment = prev.length > 0 ? prev[prev.length - 1] : null;
-            
-            if (lastSegment && lastSegment.speaker === currentSpeaker) {
-              // If same speaker, merge with previous segment
-              const updatedSegments = [...prev];
-              const newText = lastSegment.text + ' ' + cleanedText;
-              
-              updatedSegments[updatedSegments.length - 1] = {
-                ...lastSegment,
-                text: newText
-              };
-              return updatedSegments;
-            } else {
-              // Different speaker, add as new segment
-              const segmentId = nextSegmentIdRef.current++;
-              
-              // If translation is enabled, track this segment as pending translation
-              if (targetLanguage) {
-                // Get current pending segments for this speaker
-                const pendingIds = pendingSegmentsRef.current.get(currentSpeaker) || [];
-                
-                // Add this segment ID to the pending list
-                pendingSegmentsRef.current.set(currentSpeaker, [...pendingIds, segmentId]);
-              }
-              
-              return [...prev, { 
-                id: segmentId,
-                text: cleanedText, 
-                speaker: currentSpeaker || 'UU',
-                translations: [],
-                timestamp: Date.now()
-              }];
-            }
-          });
-        }
-        
-        setPartialTranscript('');
-      } else if (data.message === 'AddTranslation' || data.message === 'AddPartialTranslation') {
-        // Process translation without any logging
-        handleTranslation(data, data.message === 'AddPartialTranslation');
-      } else if (data.message === 'EndOfTranscript') {
-        // Handle end of transcript without logging
-        stopRecording();
-      } else if (data.message === 'Error') {
-        setError(`Transcription error: ${data.type}: ${data.reason || 'Unknown error'}`);
-        stopRecording();
-      }
-      
-      // Add handling for predictions if your API supports it
-      if (data.message === 'AddPrediction') {
-        const predictionText = data.text || '';
-        
-        // Update predictions array with new prediction
-        setPredictions(prev => {
-          // Create a new array with the new prediction first, then up to 2 previous ones
-          const updatedPredictions = [predictionText, ...prev.slice(0, 2)];
-          console.log(`[PREDICTION_UI] Updated predictions array (${updatedPredictions.length} items)`);
-          return updatedPredictions;
-        });
-        
-        setIsPredicting(false);
-        setPredictionError(null);
-      }
-    });
-    
-    return () => {
-      try {
-        if (isRecording) {
-          stopRecording();
-        }
-      } catch (error) {
-        console.warn("Error during cleanup:", error);
-      }
-    };
-  }, [targetLanguage]);
-
   // Add this effect to update the ref when we get valid predictions
   useEffect(() => {
     if (predictions.length > 0 && predictions[0].trim() !== '') {
       lastValidPredictionsRef.current = [...predictions];
     }
   }, [predictions]);
-
-  // Add this to preserve predictions when recording stops
-  useEffect(() => {
-    // When recording stops, make sure we keep the last predictions visible
-    if (!isRecording && predictions.length === 0 && lastValidPredictionsRef.current.length > 0) {
-      setPredictions(lastValidPredictionsRef.current);
-    }
-  }, [isRecording, predictions]);
 
   // Initialize client
   useEffect(() => {
@@ -924,6 +751,145 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
     }
   };
 
+  // Add these new states for the background information dialog
+  const [showBackgroundDialog, setShowBackgroundDialog] = useState(false);
+  const [backgroundInfo, setBackgroundInfo] = useState('');
+  
+  // Add this effect to initialize background info when conversation changes
+  useEffect(() => {
+    if (conversation?.context || currentConversation?.context) {
+      setBackgroundInfo(conversation?.context || currentConversation?.context || '');
+    }
+  }, [conversation, currentConversation]);
+  
+  // Add this function to save the context when dialog is closed
+  const saveBackgroundInfo = async () => {
+    try {
+      const conversationId = conversation?.id || currentConversation?.id;
+      if (conversationId) {
+        console.log(`Saving background info for conversation ${conversationId}:`, backgroundInfo);
+        
+        // Make sure the update data has the correct structure
+        // The ConversationUpdate model in the backend expects an id field
+        const updateData = { 
+          id: conversationId,  // Add the ID to match the expected schema
+          context: backgroundInfo 
+        };
+        
+        console.log("Update payload:", updateData);
+        
+        // Call the update function and wait for response
+        const response = await updateConversation(conversationId, updateData);
+        console.log("Update response:", response);
+        
+        // Update local state with the response data
+        if (response && response.context !== undefined) {
+          setBackgroundInfo(response.context || '');
+        }
+        
+        setShowBackgroundDialog(false);
+      } else {
+        console.error("No conversation ID found");
+        setError("Cannot save background information: No conversation selected");
+      }
+    } catch (error) {
+      console.error('Error saving background information:', error);
+      setError(`Failed to save background information: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
+  // Add this function to move the cursor to the end of the text when the dialog opens
+  const handleBackgroundInfoDialogOpen = () => {
+    // Get the latest context value
+    const currentContext = conversation?.context || currentConversation?.context || '';
+    setBackgroundInfo(currentContext);
+    setShowBackgroundDialog(true);
+  };
+
+  // Fix the prediction stream functionality to prevent multiple concurrent requests
+  useEffect(() => {
+    // Only attempt to stream predictions if:
+    // 1. We have a conversation
+    // 2. We're actively recording
+    // 3. We have transcript segments to analyze
+    // 4. We don't already have an active prediction stream
+    const conversationId = conversation?.id || currentConversation?.id;
+    
+    if (conversationId && isRecording && transcriptSegments.length > 0 && !activePredictionStreamRef.current) {
+      console.log("[PREDICTION] Starting prediction stream...");
+      activePredictionStreamRef.current = true;
+      setIsPredicting(true);
+      
+      // Create a transcript object compatible with the API
+      const transcript = {
+        segments: transcriptSegments
+      };
+      
+      // Set up callbacks
+      const handlePredictionData = (data) => {
+        console.log("[PREDICTION] Received data:", data);
+        if (data.text) {
+          setPredictions(prev => {
+            // Create a new array with the new prediction first, then up to 2 previous ones
+            const updatedPredictions = [data.text, ...prev.slice(0, 2)];
+            console.log(`[PREDICTION] Updated predictions array (${updatedPredictions.length} items)`);
+            return updatedPredictions;
+          });
+        }
+        
+        // If stream is complete, mark the ref as inactive to allow new requests
+        if (data.complete) {
+          activePredictionStreamRef.current = false;
+          setIsPredicting(false);
+        }
+        setPredictionError(null);
+      };
+      
+      const handlePredictionError = (error) => {
+        console.error("[PREDICTION] Error:", error);
+        setPredictionError(error.text || "Failed to get predictions");
+        setIsPredicting(false);
+        // Mark the stream as inactive on error
+        activePredictionStreamRef.current = false;
+      };
+      
+      const handlePredictionComplete = () => {
+        console.log("[PREDICTION] Stream completed");
+        setIsPredicting(false);
+        // Mark the stream as inactive when completed
+        activePredictionStreamRef.current = false;
+      };
+      
+      // Import and use the streamPrediction function from API
+      import("@/api/conversation").then(({ streamPrediction }) => {
+        streamPrediction(
+          conversationId,
+          transcript,
+          handlePredictionData,
+          handlePredictionError,
+          handlePredictionComplete
+        );
+      }).catch(error => {
+        console.error("Failed to import streamPrediction:", error);
+        setPredictionError("Failed to load prediction functionality");
+        // Mark the stream as inactive on error
+        activePredictionStreamRef.current = false;
+      });
+      
+      return () => {
+        // Clean up prediction stream if component unmounts or dependencies change
+        console.log("[PREDICTION] Cleaning up prediction stream");
+        // Mark the stream as inactive when cleaned up
+        activePredictionStreamRef.current = false;
+      };
+    }
+    
+    // If recording stops, make sure to reset the active stream flag
+    if (!isRecording) {
+      activePredictionStreamRef.current = false;
+    }
+  }, [conversation?.id, currentConversation?.id, isRecording, transcriptSegments]);
+
   // Render the UI
   return (
     <div className="w-full flex flex-col min-h-[600px] h-full">
@@ -949,14 +915,28 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
         <div className="px-6 pt-5 pb-4 bg-transparent mb-2">
           <div className="flex justify-between items-start">
             <div className="flex-1">
-              <div className="text-lg font-semibold mb-1 flex flex-wrap">
+              <div className="text-lg font-semibold mb-1 flex flex-wrap items-center">
                 <span>
                   Live Conversation&nbsp;
                 </span>
+                
                 {(conversation?.name || currentConversation?.name) && (
                   <span className="text-gray-500 dark:text-gray-400 break-all">
                     ({conversation?.name || currentConversation?.name})
                   </span>
+                )}
+                
+                {/* Only show background info button if we have a conversation ID */}
+                {(conversation?.id || currentConversation?.id) && (
+                  <Button 
+                    variant="simple" 
+                    size="icon" 
+                    onClick={handleBackgroundInfoDialogOpen}
+                    className="ml-1"
+                    title="Background Information"
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
                 )}
               </div>
               {targetLanguage && (
@@ -1045,39 +1025,7 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
                 )}
               </>
             )}
-            
-            {/* Display predictions section */}
-            {predictions.length > 0 && (
-              <div className="mt-6 space-y-3">
-                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-                  <Sparkles className="w-4 h-4 mr-1" />
-                  AI Predictions
-                </h3>
-                
-                {/* Show up to 3 predictions */}
-                {predictions.map((prediction, index) => (
-                  <div 
-                    key={index}
-                    className={`p-3 rounded-lg border ${
-                      index === 0 
-                        ? 'border-blue-300 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30' 
-                        : 'border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30'
-                    } ${index > 0 ? 'text-sm' : ''}`}
-                  >
-                    {prediction}
-                    {index === 0 && isPredicting && (
-                      <span className="inline-block w-1 h-4 ml-1 bg-blue-500 animate-pulse" />
-                    )}
-                  </div>
-                ))}
-                
-                {predictionError && (
-                  <div className="text-red-500 text-sm">
-                    Error: {predictionError}
-                  </div>
-                )}
-              </div>
-            )}
+
           </div>
         </div>
         
@@ -1121,6 +1069,34 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
             className="w-full"
           />
         </div>
+        
+        {/* Background Information Dialog */}
+        <Dialog open={showBackgroundDialog} onOpenChange={setShowBackgroundDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Background Information</DialogTitle>
+              <DialogDescription>
+                Add any context or background information about this conversation.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Textarea
+                value={backgroundInfo}
+                onChange={(e) => setBackgroundInfo(e.target.value)}
+                placeholder="Add background information to help AI understand this conversation better..."
+                className="min-h-[200px] background-info-textarea"
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowBackgroundDialog(false)} className="mr-2">
+                Cancel
+              </Button>
+              <Button onClick={saveBackgroundInfo}>
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
         
       </div>
     </div>

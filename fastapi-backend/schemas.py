@@ -62,6 +62,7 @@ class ResetPasswordRequest(BaseModel):
 class ConversationUpdate(BaseModel):
     id: int
     name: Optional[str] = None
+    context: Optional[str] = None
     transcript: Optional[List[Dict[str, Any]]] = None
     summary: Optional[str] = None
     

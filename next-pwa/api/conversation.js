@@ -50,9 +50,20 @@ export const deleteConversation = async (conversationId) => {
   });
 };
 
+// Track active prediction stream globally
+let activePredictionStream = false;
+
 // Stream predictions for a conversation - Modified to work with the backend
 export const streamPrediction = async (conversationId, transcript, onDataCallback, onErrorCallback, onCompleteCallback) => {
   try {
+    // Check if there's already an active prediction stream
+    if (activePredictionStream) {
+      console.log(`[PREDICTION] Ignoring prediction request - stream already active`);
+      return null;
+    }
+    
+    // Mark stream as active
+    activePredictionStream = true;
     console.log(`[PREDICTION] Fetching prediction for conversation ${conversationId}`);
     
     // Convert string ID to number if needed
@@ -113,10 +124,18 @@ export const streamPrediction = async (conversationId, transcript, onDataCallbac
             error: false
           });
         }
+        
+        // If we get complete signal, mark the stream as inactive
+        if (predictionData.complete) {
+          activePredictionStream = false;
+        }
       },
       // onError callback
       (error) => {
         console.error(`[PREDICTION] Error: ${error.message || error}`);
+        // Mark the stream as inactive on error
+        activePredictionStream = false;
+        
         if (onErrorCallback) {
           onErrorCallback({
             text: error.message || "Connection error. Will retry shortly...",
@@ -130,6 +149,9 @@ export const streamPrediction = async (conversationId, transcript, onDataCallbac
       // onComplete callback
       () => {
         console.log(`[PREDICTION] Stream completed for conversation ${numericId}`);
+        // Mark the stream as inactive when complete
+        activePredictionStream = false;
+        
         if (onCompleteCallback) {
           onCompleteCallback();
         }
@@ -137,6 +159,9 @@ export const streamPrediction = async (conversationId, transcript, onDataCallbac
     );
   } catch (error) {
     console.log(`[PREDICTION] Error: ${error.message}`);
+    // Mark the stream as inactive on error
+    activePredictionStream = false;
+    
     if (onErrorCallback) {
       onErrorCallback({
         text: error.message || "Connection error. Will retry shortly...",

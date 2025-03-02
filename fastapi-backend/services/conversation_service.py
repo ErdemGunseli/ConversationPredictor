@@ -65,9 +65,10 @@ async def stream_conversation_predictions(
     
     transcript_string = json.dumps(conversation.transcript)
     messages = [
-        {"role": "system", "content": f"{PREDICTION_CONTEXT.format(transcript=transcript_string)}\nAdditional context: {conversation.context}"},
+        {"role": "system", "content": f"{PREDICTION_CONTEXT.format(transcript=transcript_string, context=conversation.context)}\nAdditional context: {conversation.context}"},
     ]
     
     async for prediction_chunk in stream_message(user, messages):
         result = json.dumps(prediction_chunk)
+        print(f"\n\nGOT PREDICTION CHUNK: {result}\n\n")
         yield result + "\n"
