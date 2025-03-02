@@ -912,6 +912,9 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
           getSpeakerColor={getSpeakerColor}
           getSpeakerName={getSpeakerName}
           getSpeakerBgColor={getSpeakerBgColor}
+          prediction={predictions[0] || ""}
+          isPredicting={isPredicting}
+          predictionError={predictionError}
         />,
         document.body
       )}
