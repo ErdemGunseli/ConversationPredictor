@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils";
-
+import { GlowingEffect } from './glowing-effect';
 interface InsightsButtonProps {
   summary: string | null;
   className?: string;
@@ -41,6 +41,16 @@ export const InsightsButton: React.FC<InsightsButtonProps> = ({
         AI Insights
       </Button>
       
+
+      <GlowingEffect
+          blur={0}
+          borderWidth={3}
+          spread={80}
+          glow={true}
+          disabled={false}
+          proximity={64}
+          inactiveZone={0.01}
+        />
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent 
           onOpenAutoFocus={(e) => {
@@ -64,11 +74,22 @@ export const InsightsButton: React.FC<InsightsButtonProps> = ({
                 AI Insights
               </span>
             </DialogTitle>
+            
             <DialogDescription className="text-left">
               Conversation notes
             </DialogDescription>
           </DialogHeader>
+
           <div className="bg-muted/50 rounded-md whitespace-pre-wrap overflow-y-auto">
+            <GlowingEffect
+              blur={0}
+              borderWidth={3}
+              spread={80}
+              glow={true}
+              disabled={false}
+              proximity={64}
+              inactiveZone={0.01}
+            />
             {summary}
           </div>
         </DialogContent>

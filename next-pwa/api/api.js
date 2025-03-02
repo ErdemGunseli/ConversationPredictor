@@ -2,7 +2,7 @@ import { getTokens } from './auth';
 import { showToast } from '@/services/toastService';
 
 
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://heard.onrender.com'
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://conversationpredictor-iaiu.onrender.com'
 
 
 // Creating a custom API Error to encapsulate the status code and message:
