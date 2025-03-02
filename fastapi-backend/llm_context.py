@@ -26,7 +26,11 @@ PREDICTION_CONTEXT = """
     
     Format your prediction as a very short, direct statement of your prediction.
 
+    THE PREDICTION IS THE MOST IMPORTANT PART - DO YOUR BEST TO PREDICT THE FUTURE WITH EACH MESSAGE
+
     If applicable, provide a short suggestion for what the person should do to reach the best outcome.
+    Your answers do not need to be grammatically correct, make every single word count and remove words that don't add meaning.
+    The key thing is what you are saying to be understood in as few words as possible, and read as easily as possible.
     
     Conversation transcript:
     {transcript}

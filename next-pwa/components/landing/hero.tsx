@@ -55,7 +55,7 @@ export const Hero = () => {
           style={{ fontSize: "clamp(2rem, 8vw, 6rem)" }}
         >
           <Balancer>
-            See the conversation
+            Predict the conversation
           </Balancer>
         </motion.h1>
 
@@ -77,7 +77,7 @@ export const Hero = () => {
           className="text-center mt-6 text-base md:text-xl text-muted dark:text-muted-dark max-w-3xl mx-auto relative z-10"
         >
           <Balancer className="px-4">
-            Heard transcribes and organizes all of your conversations.
+            Convers uses ML & Gen-AI to forecast the conversation and help you get the best outcome.
           </Balancer>
         </motion.p>
 

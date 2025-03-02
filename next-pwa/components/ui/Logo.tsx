@@ -25,7 +25,7 @@ export const Logo = ({ size = "text-sm" }) => {
           className="rounded-full"
         />
       </div>
-      <span className="font-medium text-black dark:text-white">Heard</span>
+      <span className="font-medium text-black dark:text-white">Convers</span>
     </Link>
   );
 };

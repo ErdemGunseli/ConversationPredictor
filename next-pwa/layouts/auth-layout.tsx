@@ -62,14 +62,14 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
                   "font-semibold text-xl text-center text-muted dark:text-white mt-4"
                 )}
               >
-                See the conversation.
+                Predict the conversation.
               </p>
               <p
                 className={cn(
                   "font-normal text-base text-center text-neutral-700 dark:text-neutral-200 mt-6"
                 )}
               >
-                Heard transcribes and organizes all of your conversations.
+                Convers uses ML & Gen-AI to forecast the conversation and help you get the best outcome.
               </p>
             </div>
           </BackgroundGradientAnimation>

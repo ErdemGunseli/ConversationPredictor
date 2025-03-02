@@ -13,9 +13,9 @@ import { GlassesModeProvider } from '@/context/GlassesModeContext';
 import { ConversationProvider } from "@/context/ConversationContext";
 
 export const metadata: Metadata = {
-  title: "Heard",
+  title: "Convers",
   description:
-    "Heard transcribes and organizes all of your conversations.",
+    "Predict the conversation",
   openGraph: {
     images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"], // TODO: REPLACE WITH SCREENSHOT OF DASHBOARD
   },

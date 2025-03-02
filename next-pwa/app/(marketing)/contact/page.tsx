@@ -7,9 +7,9 @@ import { ContactForm } from "@/components/landing/contact";
 import { Logo } from "@/components/ui/Logo";
 import { NavBar } from "@/components/navbar";
 export const metadata: Metadata = {
-  title: "Contact - Heard",
+  title: "Contact - Convers",
   description:
-    "Heard transcribes and organizes all of your conversations.",
+    "Predict the conversation",
   openGraph: {
     images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
   },

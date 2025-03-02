@@ -7,9 +7,9 @@ import { Subheading } from "@/components/ui/subheading";
 import { BlogCard } from "@/components/blog/blog-card";
 
 export const metadata: Metadata = {
-  title: "Blog - Heard",
+  title: "Blog - Convers",
   description:
-    "Heard transcribes and organizes all of your conversations.",
+    "Predict the conversation",
   openGraph: {
     images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
   },

@@ -56,13 +56,7 @@ export function SidebarWithHover() {
     );
 }
 
-/**
- * The primary layout for the sidebar:
- * - Bottom links: Profile, conditional Install Heard, Log out.
- * - In desktop mode: Logo + ModeToggle at the top.
- * - In mobile mode (when menu closed): side-drawer toggle button on the left, then Logo, then ModeToggle on the same row.
- * - In mobile mode (when menu open): Logo and ModeToggle on the left, close icon on the right.
- */
+
 export function SidebarLayout({
   className,
   children,
@@ -111,7 +105,7 @@ export function SidebarLayout({
         ...(shouldShowInstall
             ? [
                 {
-                    label: "Install Heard",
+                    label: "Install Convers",
                     icon: (
                         <IconDownload className="h-5 w-5 flex-shrink-0 text-neutral-700 dark:text-neutral-200" />
                     ),
@@ -401,14 +395,10 @@ function Dashboard() {
   );
 }
 
-/**
- * A small component specifically for mobile bottom links.
- * (ModeToggle is placed in the mobile top bar next to the Heard logo, not at the bottom.)
- */
+
 function MobileBottomLinks({ bottomLinks }: { bottomLinks: Links[] }) {
   return (
     <div className="flex md:hidden flex-col gap-2 p-3 h-auto">
-      {/* The bottom links (Profile, optional "Install Heard", Log out) */}
       {bottomLinks.map((link, idx) => (
         <SidebarLink key={idx} link={link} id={`mobile-bottom-link-${idx}`} />
       ))}
@@ -468,12 +458,7 @@ export const DesktopSidebar = ({
   );
 };
 
-/**
- * The mobile sidebar behaves as a "drawer" that appears when the user clicks the
- * IconLayoutSidebar button in the top bar (if not open). 
- * If open, we show the sidebar with a close icon.
- * The mode toggle is also shown next to the Heard logo in both cases.
- */
+
 export const MobileSidebar = ({
   className,
   children,

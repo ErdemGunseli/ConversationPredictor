@@ -2,9 +2,9 @@ import { LoginForm } from "@/components/auth/login";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Login - Heard",
+  title: "Login - Convers",
   description:
-    "Heard transcribes and organizes all of your conversations.",
+    "Predict the conversation",
   openGraph: {
     images: ["https://ai-saas-template-aceternity.vercel.app/banner.png"],
   },
