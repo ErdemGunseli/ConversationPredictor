@@ -83,7 +83,7 @@ export default function Home() {
         {/* <Testimonials /> */}
       </Container>
       <Lamp >
-        Two-way conversation enabled by AR glasses
+        See the conversation in AR
       </Lamp>
       <div className="relative">
         <div className="absolute inset-0 h-full w-full overflow-hidden">

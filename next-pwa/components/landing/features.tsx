@@ -19,23 +19,23 @@ export const Features = () => {
         "col-span-1 md:col-span-4 border-b border-r dark:border-neutral-800",
     },
     {
-      title: "Create stupid simple chatbots",
+      title: "Works on every device",
       description:
-        "Create Chatbots with a single button click. Customize as per your requirements and the AI will take care of the rest.",
+        "Get the most accurate speaker recognition and rapid predictions.",
       skeleton: <SkeletonTwo />,
       className: "border-b col-span-1 md:col-span-2 dark:border-neutral-800",
     },
     {
-      title: "We support every single LLM",
+      title: "Identify up to 10 speakers",
       description:
-        "Whether it's OpenAI, GroQ or Your Mom's Basement LLM, we support everything.",
+        "Convers recognizes different voices and identifies them.",
       skeleton: <SkeletonThree />,
       className: "col-span-1 md:col-span-3 border-r dark:border-neutral-800",
     },
     {
-      title: "Deploy in seconds",
+      title: "Talk in 50+ Languages",
       description:
-        "With our blazing fast, state of the art, cutting edge, we are so back cloud servies (read AWS) - you can deploy your model in seconds.",
+        "Translate conversations in real-time.",
       skeleton: <SkeletonFour />,
       className: "col-span-1 md:col-span-3",
     },
@@ -43,7 +43,7 @@ export const Features = () => {
   return (
     <div className="relative z-20 py-10 md:py-40">
       <Heading as="h2">
-        Built with accessibility in mind
+        Know it before it happens
         </Heading>
       <Subheading className="text-center ">
         Packed with features for <em>everyone</em>.

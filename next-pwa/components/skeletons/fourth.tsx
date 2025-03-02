@@ -1,21 +1,10 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 import { Globe } from "../ui/globe";
 
 export const SkeletonFour = () => {
   return (
     <div className="h-full  flex flex-col items-center relative bg-white dark:bg-black mt-10">
-      <InfiniteMovingCards speed="fast" direction="left">
-        <MovingGrid />
-      </InfiniteMovingCards>
-      <InfiniteMovingCards speed="slow" direction="right">
-        <MovingGrid />
-      </InfiniteMovingCards>
-      <InfiniteMovingCards speed="normal" direction="left">
-        <MovingGrid />
-      </InfiniteMovingCards>
-
       <Globe className="absolute -right-2 md:-right-40 -bottom-40" />
     </div>
   );

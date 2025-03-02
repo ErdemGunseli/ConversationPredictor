@@ -1,6 +1,8 @@
 "use client";
 import { stagger, useAnimate } from "framer-motion";
 import React, { useState } from "react";
+import { Logo } from "../ui/Logo";
+import { WavyBackground } from "../ui/wavy-background";
 
 export const SkeletonTwo = () => {
   const [scope, animate] = useAnimate();
@@ -27,28 +29,12 @@ export const SkeletonTwo = () => {
       <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-white via-white dark:from-black dark:via-black to-transparent w-full pointer-events-none" />
       <div className="p-4 border border-neutral-200 bg-neutral-100 dark:bg-neutral-800 dark:border-neutral-700 rounded-[32px] h-full z-20">
         <div className="p-2 bg-white dark:bg-black dark:border-neutral-700 border border-neutral-200 rounded-[24px] h-full">
-          <div className="w-20 rounded-full bg-neutral-200/80 dark:bg-neutral-800/80 mx-auto h-6" />
-          <div
-            onMouseEnter={handleAnimation}
-            ref={scope}
-            className="content mt-4 w-[90%] mx-auto"
-          >
-            <UserMessage>
-              Hello chat! Give me all the links from this website -
-              https://ui.aceternity.com
-            </UserMessage>
-            <AIMessage>Why don&apos;t you do it yourself?</AIMessage>
-            <UserMessage>
-              Umm.. Because I&apos;m paying $20/mo for your services?
-            </UserMessage>
-            <AIMessage>You think I work for the money?</AIMessage>
-            <UserMessage>Who do you think you are?</UserMessage>
-            <AIMessage>I&apos; batman.</AIMessage>
-            <AIMessage>
-              Now Playing <br />{" "}
-              <span className="italic">Something in the way - Nirvana</span>
-            </AIMessage>
+          <div className="flex justify-center mt-20">
+            <Logo size="text-5xl" />
           </div>
+          <WavyBackground />
+
+
         </div>
       </div>
     </div>

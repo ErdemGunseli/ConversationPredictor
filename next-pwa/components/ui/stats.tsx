@@ -8,24 +8,24 @@ export function StatsWithNumberTicker() {
   const items = [
     {
       description:
-        "Years in the business trying to build this business from the ground up.",
-      value: 10,
+        "ms ultra-low latency",
+      value: 100,
       subtext: "trillion",
     },
     {
-      description: "People Fought trying to establish our brand.",
-      value: 100,
+      description: "% speech accuracy",
+      value: 90,
       subtext: "million",
     },
     {
       description:
-        "Fight Club Attendance so that everyone knows the first rule.",
-      value: 25724,
+        "languages",
+      value: 50,
       subtext: "million",
     },
     {
-      description: "People trying to get access but guess what? they can't.",
-      value: 69420,
+      description: "competitors",
+      value: 0,
       subtext: "million",
     },
   ];
@@ -33,11 +33,10 @@ export function StatsWithNumberTicker() {
     <section className="group/container relative mx-auto w-full max-w-7xl overflow-hidden rounded-3xl p-10 py-20">
       <div className="relative z-20">
         <h2 className="text-center text-xl font-bold text-neutral-700 dark:text-neutral-100 md:text-3xl">
-          Works on every device
+          Blazing fast
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-sm text-neutral-800 dark:text-neutral-200 md:text-base">
-          We are a team of experienced fighters and boxers who are passionate
-          about helping you grow your business.
+          Keeps up with you wherever the conversation goes
         </p>
         <div className="mx-auto mt-10 grid max-w-7xl grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4">
           {items.map((item, index) => (
