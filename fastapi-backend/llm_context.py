@@ -34,6 +34,9 @@ PREDICTION_CONTEXT = """
 
     NEVER use 'may' or 'might' in your predictions - you are predicting, not guessing. Use phrases such as 'likely to'.
 
+    NEVER RE-STATE WHAT IS SAID IN THE CONVERSATION AS YOUR PREDICTION!
+    ALWAYS CREATE A PREDICTION THAT GOES BEYOND WHAT IS SAID IN THE CONVERSATION!!
+
     Conversation Context:
     {context}
     

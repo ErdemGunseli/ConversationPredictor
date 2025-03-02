@@ -11,9 +11,9 @@ import { SkeletonThree } from "../skeletons/third";
 export const Features = () => {
   const features = [
     {
-      title: "Generate images with text",
+      title: "Personalizes to you",
       description:
-        "Generate images from a text prompt, a video, or a video segment in bulk at the speed of light.",
+        "Upload background information to get high-accuracy predictions.",
       skeleton: <SkeletonOne />,
       className:
         "col-span-1 md:col-span-4 border-b border-r dark:border-neutral-800",
@@ -46,18 +46,25 @@ export const Features = () => {
         Know it before it happens
         </Heading>
       <Subheading className="text-center ">
-        Packed with features for <em>everyone</em>.
+        Your personal crystal ball
       </Subheading>
 
       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-6 mt-12">
-          {features.map((feature) => (
-            <FeatureCard key={feature.title} className={feature.className}>
-              <FeatureTitle>{feature.title}</FeatureTitle>
-              <FeatureDescription>{feature.description}</FeatureDescription>
-              <div className=" h-full w-full">{feature.skeleton}</div>
-            </FeatureCard>
-          ))}
+          {features.map((feature) => {
+            // Special handling for SkeletonOne
+            const isSkeletonOne = feature.title === "Personalizes to you";
+            
+            return (
+              <FeatureCard key={feature.title} className={feature.className}>
+                <FeatureTitle>{feature.title}</FeatureTitle>
+                <FeatureDescription>{feature.description}</FeatureDescription>
+                <div className={`w-full mx-auto ${isSkeletonOne ? 'flex justify-center items-center' : 'h-full'}`}>
+                  {feature.skeleton}
+                </div>
+              </FeatureCard>
+            );
+          })}
         </div>
         <GridLineHorizontal
           style={{
