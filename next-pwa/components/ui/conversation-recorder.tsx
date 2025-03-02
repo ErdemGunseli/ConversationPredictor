@@ -68,6 +68,13 @@ interface PredictionData {
   error: boolean;
 }
 
+// Add this interface near the PredictionData interface
+interface PredictionError {
+  text?: string;
+  message?: string;
+  [key: string]: any; // For any other properties the error might have
+}
+
 export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ conversation }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -845,7 +852,7 @@ export const ConversationRecorder: React.FC<{ conversation?: any }> = ({ convers
         setPredictionError(null);
       };
       
-      const handlePredictionError = (error) => {
+      const handlePredictionError = (error: PredictionError) => {
         console.error("[PREDICTION] Error:", error);
         setPredictionError(error.text || "Failed to get predictions");
         setIsPredicting(false);
